@@ -1,6 +1,10 @@
 package bigboss27051.liveat500px.flagment;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
@@ -10,17 +14,24 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.inthecheesefactory.thecheeselibrary.manager.Contextor;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
+import bigboss27051.liveat500px.activity.MoreInfoActivity;
 import bigboss27051.liveat500px.adapter.PhotoListAdapter;
 import bigboss27051.liveat500px.R;
 import bigboss27051.liveat500px.dao.PhotoItemCollectionDao;
+import bigboss27051.liveat500px.dao.PhotoItemDao;
+import bigboss27051.liveat500px.datatype.MutableIntager;
 import bigboss27051.liveat500px.manager.HttpManager;
 import bigboss27051.liveat500px.manager.PhotoListManager;
 import retrofit2.Call;
@@ -34,6 +45,9 @@ public class MainFlagment extends Fragment {
     /***
      * Variable Zone
      ****/
+    public interface FlagmentListener {
+        void onPhotoItemClick(PhotoItemDao dao);
+    }
 
     SwipeRefreshLayout swipeRefreshLayout;
     ListView listView;
@@ -41,6 +55,7 @@ public class MainFlagment extends Fragment {
     PhotoListManager photoListManager;
     Button btnNewPhoto;
     boolean isLoadingMore = false;
+    MutableIntager lastPositionInteger;
 
     /***
      * Function Zone
@@ -58,29 +73,48 @@ public class MainFlagment extends Fragment {
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        init(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            onRestoreInstanceState(savedInstanceState);
+        }
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.flagment_main, container, false);
-        initInstances(rootView);
+
+        initInstances(rootView, savedInstanceState);
         return rootView;
     }
 
-    private void initInstances(View rootView) {
+    private void init(Bundle savedInstanceState) {
         photoListManager = new PhotoListManager();
+        lastPositionInteger = new MutableIntager(-1);
+
+    }
+
+    private void initInstances(View rootView, Bundle saveInstanceState) {
         listView = (ListView) rootView.findViewById(R.id.lvListView);
-        listAdapter = new PhotoListAdapter();
+        listAdapter = new PhotoListAdapter(lastPositionInteger);
+        listAdapter.setDao(photoListManager.getDao());
         listView.setAdapter(listAdapter);
+        listView.setOnItemClickListener(listViewItemClickListener);
+
         btnNewPhoto = (Button) rootView.findViewById(R.id.btnNewPhoto);
-
         btnNewPhoto.setOnClickListener(buttonClickListener);
-
-
         swipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeRefreshLayout);
         swipeRefreshLayout.setOnRefreshListener(pullToRefresh);
 
         listView.setOnScrollListener(listViewScrollListener);
 
-        refreshData();
+        if (saveInstanceState == null) {
+            refreshData();
+        }
     }
 
     private void refreshData() {
@@ -134,6 +168,13 @@ public class MainFlagment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         // Save Instance State here
+        outState.putBundle("photoListManager", photoListManager.onSaveIstanceState());
+        outState.putBundle("lastPositionInteger", lastPositionInteger.onSaveInstanceState());
+    }
+
+    private void onRestoreInstanceState(Bundle saveInstanceState) {
+        photoListManager.onRestoreIntanceState(saveInstanceState.getBundle("photoListManager"));
+        lastPositionInteger.onRestoreInstanceState(saveInstanceState.getBundle("lastPositionInteger"));
     }
 
     /*
@@ -142,9 +183,6 @@ public class MainFlagment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if (savedInstanceState != null) {
-            // Restore Instance State here
-        }
     }
 
     private void showButtonNewPhoto() {
@@ -213,6 +251,17 @@ public class MainFlagment extends Fragment {
         }
     };
 
+    final AdapterView.OnItemClickListener listViewItemClickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            if(position < photoListManager.getCount()) {
+                PhotoItemDao dao = photoListManager.getDao().getData().get(position);
+                FlagmentListener listener = (FlagmentListener) getActivity();
+                listener.onPhotoItemClick(dao);
+            }
+        }
+    };
+
     /*****
      * Inner Class
      *****/
@@ -240,10 +289,15 @@ public class MainFlagment extends Fragment {
                 int top = c == null ? 0 : c.getTop();
 
                 if (mode == MODE_RELOAD_NEWER) {
+
                     photoListManager.insertDaoAtTopPosition(dao);
+
                 } else if (mode == MODE_RELOAD_MORE) {
+
                     photoListManager.appendDaoAtTopPosition(dao);
+
                 } else {
+
                     photoListManager.setDao(dao);
                 }
                 clearLoadingMoreFlagTfCapable(mode);

@@ -1,5 +1,6 @@
 package bigboss27051.liveat500px.activity;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.PersistableBundle;
@@ -16,9 +17,10 @@ import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import bigboss27051.liveat500px.R;
+import bigboss27051.liveat500px.dao.PhotoItemDao;
 import bigboss27051.liveat500px.flagment.MainFlagment;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MainFlagment.FlagmentListener{
 
     DrawerLayout drawerLayout;
     ActionBarDrawerToggle actionBarDrawerToggle;
@@ -78,5 +80,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onPhotoItemClick(PhotoItemDao dao) {
+        Intent intent = new Intent(MainActivity.this,MoreInfoActivity.class);
+        startActivity(intent);
     }
 }

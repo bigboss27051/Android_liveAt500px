@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import bigboss27051.liveat500px.dao.PhotoItemCollectionDao;
 import bigboss27051.liveat500px.dao.PhotoItemDao;
+import bigboss27051.liveat500px.datatype.MutableIntager;
 import bigboss27051.liveat500px.manager.PhotoListManager;
 import bigboss27051.liveat500px.view.PhotoListItem;
 import bigboss27051.liveat500px.R;
@@ -18,7 +19,7 @@ import bigboss27051.liveat500px.R;
  * Created by a2g01 on 12/05/2559.
  */
 public class PhotoListAdapter extends BaseAdapter {
-    int lastPosition = 0;
+    MutableIntager lastPositionInteger;
     PhotoItemCollectionDao dao;
 
     public PhotoItemCollectionDao getDao() {
@@ -27,6 +28,10 @@ public class PhotoListAdapter extends BaseAdapter {
 
     public void setDao(PhotoItemCollectionDao dao) {
         this.dao = dao;
+    }
+
+    public PhotoListAdapter(MutableIntager lastPositionInteger) {
+        this.lastPositionInteger = lastPositionInteger;
     }
 
     @Override
@@ -106,13 +111,13 @@ public class PhotoListAdapter extends BaseAdapter {
         item.setImageUrl(dao.getImgUrl());
 
 
-        if (position > lastPosition) {
+        if (position > lastPositionInteger.getValue()) {
 
             Animation amin = AnimationUtils.loadAnimation(parent.getContext(),
                     R.anim.up_from_bottom);
             item.startAnimation(amin);
 
-            lastPosition = position;
+            lastPositionInteger.setValue(position);
         }
 
         return item;
@@ -120,7 +125,7 @@ public class PhotoListAdapter extends BaseAdapter {
     }
 
     public void increaseLastPosition(int amount) {
-        lastPosition += amount;
+        lastPositionInteger.setValue(lastPositionInteger.getValue() + amount);
     }
 
 
