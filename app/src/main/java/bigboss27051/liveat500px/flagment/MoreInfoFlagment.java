@@ -6,28 +6,34 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.SlidingPaneLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.inthecheesefactory.thecheeselibrary.view.SlidingTabLayout;
+
 import bigboss27051.liveat500px.R;
+import bigboss27051.liveat500px.dao.PhotoItemDao;
 
 /**
  * Created by nuuneoi on 11/16/2014.
  */
 @SuppressWarnings("unused")
 public class MoreInfoFlagment extends Fragment {
-
+    SlidingTabLayout slidingTabLayout;
+    PhotoItemDao dao;
     public MoreInfoFlagment() {
         super();
     }
 
     @SuppressWarnings("unused")
-    public static MoreInfoFlagment newInstance() {
+    public static MoreInfoFlagment newInstance(PhotoItemDao dao) {
         MoreInfoFlagment fragment = new MoreInfoFlagment();
         Bundle args = new Bundle();
+        args.putParcelable("dao",dao);
         fragment.setArguments(args);
         return fragment;
     }
@@ -36,6 +42,7 @@ public class MoreInfoFlagment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         init(savedInstanceState);
+        dao = getArguments().getParcelable("dao");
 
         if (savedInstanceState != null)
             onRestoreInstanceState(savedInstanceState);
@@ -62,11 +69,11 @@ public class MoreInfoFlagment extends Fragment {
             public Fragment getItem(int position) {
                 switch (position) {
                     case 0:
-                        return PhotoSummaryFlagment.newInstance();
+                        return PhotoSummaryFlagment.newInstance(dao);
                     case 1:
-                        return PhotoInfoFlagment.newInstance();
+                        return PhotoInfoFlagment.newInstance(dao);
                     case 2:
-                        return PhotoTagsFlagment.newInstance();
+                        return PhotoTagsFlagment.newInstance(dao);
                     default: return  null;
                 }
             }
@@ -75,7 +82,22 @@ public class MoreInfoFlagment extends Fragment {
             public int getCount() {
                 return 3;
             }
+
+            @Override
+            public CharSequence getPageTitle(int position) {
+                switch (position) {
+                    case 0:
+                        return "Summary";
+                    case 1:
+                        return "Info";
+                    case 2:
+                        return "Tags";
+                    default: return  "";
+                }
+            }
         });
+        slidingTabLayout  = (SlidingTabLayout) rootView.findViewById(R.id.slidingTabLayout);
+        slidingTabLayout.setViewPager(viewPager);
     }
 
     @Override

@@ -85,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements MainFlagment.Flag
     @Override
     public void onPhotoItemClick(PhotoItemDao dao) {
         Intent intent = new Intent(MainActivity.this,MoreInfoActivity.class);
+        intent.putExtra("dao",dao);
         startActivity(intent);
     }
 }

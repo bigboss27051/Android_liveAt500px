@@ -8,21 +8,23 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import bigboss27051.liveat500px.R;
+import bigboss27051.liveat500px.dao.PhotoItemDao;
 
 /**
  * Created by nuuneoi on 11/16/2014.
  */
 @SuppressWarnings("unused")
 public class PhotoInfoFlagment extends Fragment {
-
+    PhotoItemDao dao;
     public PhotoInfoFlagment() {
         super();
     }
 
     @SuppressWarnings("unused")
-    public static PhotoInfoFlagment newInstance() {
+    public static PhotoInfoFlagment newInstance(PhotoItemDao dao) {
         PhotoInfoFlagment fragment = new PhotoInfoFlagment();
         Bundle args = new Bundle();
+        args.putParcelable("dao",dao);
         fragment.setArguments(args);
         return fragment;
     }
@@ -31,7 +33,7 @@ public class PhotoInfoFlagment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         init(savedInstanceState);
-
+        dao = getArguments().getParcelable("dao");
         if (savedInstanceState != null)
             onRestoreInstanceState(savedInstanceState);
     }
@@ -40,11 +42,17 @@ public class PhotoInfoFlagment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.flagment_photo_info_summary, container, false);
+        initInstances(rootView, savedInstanceState);
+
         return rootView;
     }
 
     private void init(Bundle savedInstanceState) {
         // Init Fragment level's variable(s) here
+    }
+
+    private void initInstances(View rootView, Bundle savedInstanceState) {
+
     }
 
     @Override

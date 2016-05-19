@@ -8,23 +8,33 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import bigboss27051.liveat500px.R;
+import bigboss27051.liveat500px.dao.PhotoItemDao;
 
 /**
  * Created by nuuneoi on 11/16/2014.
  */
 @SuppressWarnings("unused")
 public class PhotoSummaryFlagment extends Fragment {
-
+    PhotoItemDao dao;
+    ImageView ivImg;
+    TextView tvName;
+    TextView tvDescription;
     public PhotoSummaryFlagment() {
         super();
     }
 
     @SuppressWarnings("unused")
-    public static PhotoSummaryFlagment newInstance() {
+    public static PhotoSummaryFlagment newInstance(PhotoItemDao dao) {
         PhotoSummaryFlagment fragment = new PhotoSummaryFlagment();
         Bundle args = new Bundle();
+        args.putParcelable("dao",dao);
         fragment.setArguments(args);
         return fragment;
     }
@@ -33,7 +43,7 @@ public class PhotoSummaryFlagment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         init(savedInstanceState);
-
+        dao = getArguments().getParcelable("dao");
         if (savedInstanceState != null)
             onRestoreInstanceState(savedInstanceState);
     }
@@ -42,11 +52,27 @@ public class PhotoSummaryFlagment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.flagment_photo_summary, container, false);
+        initInstances(rootView, savedInstanceState);
+
         return rootView;
     }
 
     private void init(Bundle savedInstanceState) {
         // Init Fragment level's variable(s) here
+    }
+
+    private void initInstances(View rootView, Bundle savedInstanceState) {
+        ivImg = (ImageView) rootView.findViewById(R.id.ivImg);
+        tvName = (TextView) rootView.findViewById(R.id.tvName);
+        tvDescription = (TextView) rootView.findViewById(R.id.tvDescription);
+
+        tvName.setText(dao.getCaption());
+        tvDescription.setText(dao.getUsername() + "\n" + dao.getCamera());
+        Glide.with(PhotoSummaryFlagment.this)
+                .load(dao.getImgUrl())
+                .placeholder(R.drawable.loading)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .into(ivImg);
     }
 
     @Override

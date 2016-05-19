@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import bigboss27051.liveat500px.R;
+import bigboss27051.liveat500px.dao.PhotoItemDao;
 import bigboss27051.liveat500px.flagment.MoreInfoFlagment;
 
 
@@ -18,9 +19,11 @@ public class MoreInfoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_more_info);
         innitInstances();
+        PhotoItemDao dao = getIntent().getParcelableExtra("dao");
+
         if(savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.moreInfoContent, MoreInfoFlagment.newInstance())
+                    .add(R.id.moreInfoContent, MoreInfoFlagment.newInstance(dao))
                     .commit();
         }
     }
